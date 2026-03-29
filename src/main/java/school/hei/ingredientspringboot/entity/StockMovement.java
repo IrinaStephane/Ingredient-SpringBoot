@@ -5,10 +5,6 @@ import lombok.*;
 
 import java.time.Instant;
 
-/**
- * Entité représentant un mouvement de stock.
- * Migré depuis la classe JDBC StockMovement (TD4).
- */
 @Entity
 @Table(name = "stock_movement")
 @Getter
@@ -26,7 +22,6 @@ public class StockMovement {
     @JoinColumn(name = "id_ingredient", nullable = false)
     private Ingredient ingredient;
 
-    /** Quantité + unité embarquées comme @Embeddable */
     @Embedded
     private StockValue value;
 

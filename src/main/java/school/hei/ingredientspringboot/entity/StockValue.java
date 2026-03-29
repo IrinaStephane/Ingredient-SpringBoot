@@ -9,10 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Objet valeur représentant une quantité avec son unité.
- * Utilisé comme @Embeddable dans StockMovement.
- */
 @Embeddable
 @Getter
 @Setter
@@ -23,8 +19,6 @@ public class StockValue {
     @Column(name = "quantity")
     private Double quantity;
 
-    // Note : si PostgreSQL lève une erreur de cast sur l'enum unit_type,
-    // remplacez @Column par @Column(columnDefinition = "unit_type")
     @Enumerated(EnumType.STRING)
     @Column(name = "unit")
     private Unit unit;

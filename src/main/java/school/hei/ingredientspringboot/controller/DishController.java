@@ -10,13 +10,6 @@ import school.hei.ingredientspringboot.service.DishService;
 
 import java.util.List;
 
-/**
- * Contrôleur REST pour les plats.
- * Expose les endpoints définis dans le TD5.
- *
- * Injection par constructeur via @RequiredArgsConstructor (Lombok).
- * Aucun @Autowired dans ce projet.
- */
 @RestController
 @RequestMapping("/dishes")
 @RequiredArgsConstructor
@@ -24,23 +17,11 @@ public class DishController {
 
     private final DishService dishService;
 
-    /**
-     * GET /dishes
-     * Retourne la liste de tous les plats avec leurs ingrédients.
-     */
     @GetMapping
     public ResponseEntity<List<DishResponse>> getAll() {
         return ResponseEntity.ok(dishService.findAll());
     }
 
-    /**
-     * PUT /dishes/{id}/ingredients
-     * Associe ou dissocie une liste d'ingrédients à un plat.
-     *
-     * - 400 si le corps de la requête est absent ou vide.
-     * - 404 si le plat n'est pas trouvé.
-     * - Les ingrédients non trouvés en BDD sont ignorés.
-     */
     @PutMapping("/{id}/ingredients")
     public ResponseEntity<?> updateIngredients(
             @PathVariable Integer id,

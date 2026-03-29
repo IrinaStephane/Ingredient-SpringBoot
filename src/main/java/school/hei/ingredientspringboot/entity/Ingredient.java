@@ -7,11 +7,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entité représentant un ingrédient.
- * Migré depuis la classe JDBC Ingredient.
- * Remplace aussi la gestion DataRetriever#findIngredientById.
- */
 @Entity
 @Table(name = "ingredient")
 @Getter
@@ -31,8 +26,6 @@ public class Ingredient {
     @Column(name = "price")
     private Double price;
 
-    // Note : si PostgreSQL lève une erreur de cast, ajouter :
-    // @Column(columnDefinition = "ingredient_category")
     @Enumerated(EnumType.STRING)
     @Column(name = "category")
     private CategoryEnum category;
@@ -41,19 +34,4 @@ public class Ingredient {
     @Builder.Default
     private List<StockMovement> stockMovements = new ArrayList<>();
 
-    /**
-     * Calcule la valeur du stock de cet ingrédient à un instant donné.
-     * Reprend la logique de getStockValueAt(Instant) du TD4.
-     */
-    public StockValue getStockValueAt(Instant at, Unit unit) {
-        double quantity = stockMovements.stream()
-                .filter(sm -> !sm.getCreationDatetime().isAfter(at))
-                .mapToDouble(sm ->
-                        sm.getType() == MovementTypeEnum.IN
-                                ? sm.getValue().getQuantity()
-                                : -sm.getValue().getQuantity()
-                )
-                .sum();
-        return new StockValue(quantity, unit);
-    }
 }

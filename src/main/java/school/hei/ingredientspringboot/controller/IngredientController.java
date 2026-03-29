@@ -12,13 +12,6 @@ import school.hei.ingredientspringboot.service.IngredientService;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Contrôleur REST pour les ingrédients.
- * Expose les endpoints définis dans le TD5.
- *
- * Injection par constructeur via @RequiredArgsConstructor (Lombok).
- * Aucun @Autowired dans ce projet.
- */
 @RestController
 @RequestMapping("/ingredients")
 @RequiredArgsConstructor
@@ -26,35 +19,16 @@ public class IngredientController {
 
     private final IngredientService ingredientService;
 
-    /**
-     * GET /ingredients
-     * Retourne la liste de tous les ingrédients.
-     */
     @GetMapping
     public ResponseEntity<List<IngredientResponse>> getAll() {
         return ResponseEntity.ok(ingredientService.findAll());
     }
 
-    /**
-     * GET /ingredients/{id}
-     * Retourne un ingrédient par son identifiant.
-     * 404 si l'ingrédient n'est pas trouvé.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<IngredientResponse> getById(@PathVariable Integer id) {
-        // La NotFoundException est gérée par GlobalExceptionHandler → 404
         return ResponseEntity.ok(ingredientService.findById(id));
     }
 
-    /**
-     * GET /ingredients/{id}/stock?at={temporal}&unit={unit}
-     * Retourne la valeur du stock d'un ingrédient à un instant donné.
-     *
-     * - 400 si `at` ou `unit` est absent.
-     * - 404 si l'ingrédient n'est pas trouvé.
-     *
-     * Exemple : GET /ingredients/1/stock?at=2024-01-06T12:00:00Z&unit=KG
-     */
     @GetMapping("/{id}/stock")
     public ResponseEntity<?> getStock(
             @PathVariable Integer id,

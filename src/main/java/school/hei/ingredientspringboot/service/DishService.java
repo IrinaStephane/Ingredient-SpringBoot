@@ -14,12 +14,6 @@ import school.hei.ingredientspringboot.repository.IngredientRepository;
 
 import java.util.List;
 
-/**
- * Service métier pour les plats.
- * Reprend la logique de DataRetriever (méthodes liées aux dishes).
- *
- * Injection par constructeur via @RequiredArgsConstructor (Lombok).
- */
 @Service
 @RequiredArgsConstructor
 public class DishService {
@@ -36,13 +30,6 @@ public class DishService {
                 .toList();
     }
 
-    /**
-     * Met à jour les ingrédients associés à un plat.
-     * PUT /dishes/{id}/ingredients
-     *
-     * - Ignore les ingrédients non trouvés en BDD.
-     * - Remplace complètement la liste des associations.
-     */
     @Transactional
     public DishResponse updateDishIngredients(Integer dishId, List<IngredientRequest> ingredientRequests) {
         // 1. Récupérer le plat (404 si non trouvé)

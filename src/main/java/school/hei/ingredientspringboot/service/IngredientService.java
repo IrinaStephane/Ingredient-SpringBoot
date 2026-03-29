@@ -15,13 +15,6 @@ import school.hei.ingredientspringboot.repository.StockMovementRepository;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Service métier pour les ingrédients.
- * Reprend la logique de DataRetriever (méthodes liées aux ingredients).
- *
- * Injection par constructeur via @RequiredArgsConstructor (Lombok).
- * Aucun @Autowired dans ce projet.
- */
 @Service
 @RequiredArgsConstructor
 public class IngredientService {
