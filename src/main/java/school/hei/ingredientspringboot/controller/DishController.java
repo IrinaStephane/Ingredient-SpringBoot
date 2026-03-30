@@ -3,6 +3,7 @@ package school.hei.ingredientspringboot.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import school.hei.ingredientspringboot.entity.Dish;
+import school.hei.ingredientspringboot.entity.DishIngredient;
 import school.hei.ingredientspringboot.entity.Ingredient;
 import school.hei.ingredientspringboot.service.DishService;
 
@@ -20,6 +21,15 @@ public class DishController {
     @GetMapping("/dishes")
     public ResponseEntity<List<Dish>> getDishes() {
         return ResponseEntity.ok(dishService.getDishes());
+    }
+
+    @GetMapping("/dishes/{id}")
+    public ResponseEntity<?> getDishById(@PathVariable Integer id) {
+        Dish dish = dishService.getDishById(id);
+        if (dish == null) {
+            return ResponseEntity.status(404).body("Dish.id=" + id + " is not found");
+        }
+        return ResponseEntity.ok(dish);
     }
 
     @PutMapping("/dishes/{id}/ingredients")

@@ -85,6 +85,7 @@ public class DishRepository {
 
             ps.setInt(1, dishId);
             try (ResultSet rs = ps.executeQuery()) {
+                // Dans DishRepository.java -> getIngredientsByDishId
                 while (rs.next()) {
                     Ingredient ingredient = new Ingredient(
                             rs.getInt("id"),
@@ -92,10 +93,18 @@ public class DishRepository {
                             CategoryEnum.valueOf(rs.getString("category")),
                             rs.getDouble("price")
                     );
+
+                    // Sécurisation de l'unité (UnitEnum)
+                    String unitStr = rs.getString("unit");
+                    UnitEnum unit = (unitStr == null) ? null : UnitEnum.valueOf(unitStr);
+
+                    // Sécurisation de la quantité
+                    Double quantity = rs.getObject("required_quantity") == null ? null : rs.getDouble("required_quantity");
+
                     DishIngredient di = new DishIngredient(
                             ingredient,
-                            rs.getObject("required_quantity") == null ? null : rs.getDouble("required_quantity"),
-                            UnitEnum.valueOf(rs.getString("unit"))
+                            quantity,
+                            unit
                     );
                     list.add(di);
                 }
@@ -109,12 +118,13 @@ public class DishRepository {
     }
 
     public Dish updateDishIngredients(Integer dishId, List<Ingredient> requestedIngredients) {
-        // Resolve only existing ingredients from DB
-        List<Ingredient> validIngredients = new ArrayList<>();
+        List<Integer> validIngredientIds = new ArrayList<>();
         for (Ingredient req : requestedIngredients) {
-            Ingredient fromDb = ingredientRepository.getIngredientById(req.getId());
-            if (fromDb != null) {
-                validIngredients.add(fromDb);
+            if (req.getId() != null) {
+                Ingredient fromDb = ingredientRepository.getIngredientById(req.getId());
+                if (fromDb != null) {
+                    validIngredientIds.add(fromDb.getId());
+                }
             }
         }
 
@@ -129,9 +139,9 @@ public class DishRepository {
 
             String insertSql = "INSERT INTO dish_ingredient (id_dish, id_ingredient) VALUES (?, ?)";
             try (PreparedStatement ins = conn.prepareStatement(insertSql)) {
-                for (Ingredient ing : validIngredients) {
+                for (Integer ingId : validIngredientIds) {
                     ins.setInt(1, dishId);
-                    ins.setInt(2, ing.getId());
+                    ins.setInt(2, ingId);
                     ins.addBatch();
                 }
                 ins.executeBatch();
