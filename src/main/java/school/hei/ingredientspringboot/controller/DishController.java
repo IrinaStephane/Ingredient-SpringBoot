@@ -1,41 +1,44 @@
 package school.hei.ingredientspringboot.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import school.hei.ingredientspringboot.dto.DishResponse;
-import school.hei.ingredientspringboot.dto.IngredientRequest;
+import school.hei.ingredientspringboot.entity.Dish;
+import school.hei.ingredientspringboot.entity.Ingredient;
 import school.hei.ingredientspringboot.service.DishService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/dishes")
-@RequiredArgsConstructor
 public class DishController {
 
     private final DishService dishService;
 
-    @GetMapping
-    public ResponseEntity<List<DishResponse>> getAll() {
-        return ResponseEntity.ok(dishService.findAll());
+    public DishController(DishService dishService) {
+        this.dishService = dishService;
     }
 
-    @PutMapping("/{id}/ingredients")
-    public ResponseEntity<?> updateIngredients(
+    @GetMapping("/dishes")
+    public ResponseEntity<List<Dish>> getDishes() {
+        return ResponseEntity.ok(dishService.getDishes());
+    }
+
+    @PutMapping("/dishes/{id}/ingredients")
+    public ResponseEntity<?> updateDishIngredients(
             @PathVariable Integer id,
-            @RequestBody(required = false) List<IngredientRequest> ingredientRequests
-    ) {
-        // Corps obligatoire → 400 si absent
-        if (ingredientRequests == null) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Request body with ingredient list is required.");
+            @RequestBody(required = false) List<Ingredient> ingredients) {
+
+        if (ingredients == null) {
+            return ResponseEntity.status(400)
+                    .body("Request body is required and must contain a list of ingredients.");
         }
 
-        // La NotFoundException est gérée par GlobalExceptionHandler → 404
-        DishResponse response = dishService.updateDishIngredients(id, ingredientRequests);
-        return ResponseEntity.ok(response);
+        Dish dish = dishService.getDishById(id);
+        if (dish == null) {
+            return ResponseEntity.status(404)
+                    .body("Dish.id=" + id + " is not found");
+        }
+
+        Dish updated = dishService.updateDishIngredients(id, ingredients);
+        return ResponseEntity.ok(updated);
     }
 }

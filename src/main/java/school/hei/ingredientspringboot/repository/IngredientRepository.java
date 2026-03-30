@@ -1,16 +1,74 @@
 package school.hei.ingredientspringboot.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import school.hei.ingredientspringboot.entity.CategoryEnum;
 import school.hei.ingredientspringboot.entity.Ingredient;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
-public interface IngredientRepository extends JpaRepository<Ingredient, Integer> {
+@Repository
+public class IngredientRepository {
 
-    boolean existsByNameIgnoreCase(String name);
+    private final DataSource dataSource;
 
-    @Query("SELECT i FROM Ingredient i WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<Ingredient> findByNameContainingIgnoreCase(@Param("name") String name);
+    public IngredientRepository(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public List<Ingredient> getIngredients() {
+        String sql = "select id, name, price, category from ingredient order by id asc";
+        List<Ingredient> ingredients = new ArrayList<>();
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+        ) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                double price = rs.getDouble("price");
+                CategoryEnum category = CategoryEnum.valueOf(rs.getString("category"));
+
+                ingredients.add(new Ingredient(id, name, category, price));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ingredients;
+    }
+
+    public Ingredient getIngredientById(Integer id) {
+        String sql = "select id, name, price, category from ingredient where id = ?";
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql);
+        ) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Ingredient(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        CategoryEnum.valueOf(rs.getString("category")),
+                        rs.getDouble("price")
+                );
+            } else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -1,5 +1,5 @@
 package school.hei.ingredientspringboot.entity;
 
-public enum Unit {
+public enum UnitEnum {
     PCS, KG, L
 }
