@@ -1,11 +1,16 @@
 package school.hei.ingredientspringboot.repository;
+
 import org.springframework.stereotype.Repository;
+import school.hei.ingredientspringboot.entity.MovementTypeEnum;
+import school.hei.ingredientspringboot.entity.StockMovement;
 import school.hei.ingredientspringboot.entity.StockValue;
 import school.hei.ingredientspringboot.entity.UnitEnum;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class StockMovementRepository {
@@ -14,6 +19,68 @@ public class StockMovementRepository {
 
     public StockMovementRepository(DataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    public List<StockMovement> findAllByIngredientIdAndPeriod(Integer ingredientId, Instant from, Instant to) {
+        String sql = """
+                SELECT id, creation_datetime, unit, quantity, type 
+                FROM stock_movement 
+                WHERE id_ingredient = ? AND creation_datetime >= ? AND creation_datetime <= ?
+                ORDER BY creation_datetime DESC
+                """;
+        List<StockMovement> movements = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, ingredientId);
+            ps.setTimestamp(2, Timestamp.from(from));
+            ps.setTimestamp(3, Timestamp.from(to));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    movements.add(new StockMovement(
+                            rs.getInt("id"),
+                            rs.getTimestamp("creation_datetime").toInstant(),
+                            UnitEnum.valueOf(rs.getString("unit")),
+                            rs.getDouble("quantity"),
+                            MovementTypeEnum.valueOf(rs.getString("type"))
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return movements;
+    }
+
+    public List<StockMovement> saveAll(Integer ingredientId, List<StockMovement> movements) {
+        String sql = "INSERT INTO stock_movement (id_ingredient, quantity, unit, type, creation_datetime) VALUES (?, ?, ?::unit, ?::movement_type, ?) RETURNING id, creation_datetime";
+        List<StockMovement> savedMovements = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection()) {
+            for (StockMovement m : movements) {
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    Instant now = Instant.now();
+                    ps.setInt(1, ingredientId);
+                    ps.setDouble(2, m.getQuantity());
+                    ps.setString(3, m.getUnit().name());
+                    ps.setString(4, m.getType().name());
+                    ps.setTimestamp(5, Timestamp.from(now));
+
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            m.setId(rs.getInt("id"));
+                            m.setCreationDatetime(rs.getTimestamp("creation_datetime").toInstant());
+                            savedMovements.add(m);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return savedMovements;
     }
 
     public StockValue getStockValueAt(Integer ingredientId, Instant at, UnitEnum unit) {

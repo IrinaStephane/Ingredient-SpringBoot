@@ -1,6 +1,7 @@
 package school.hei.ingredientspringboot.service;
 import org.springframework.stereotype.Service;
 import school.hei.ingredientspringboot.entity.Ingredient;
+import school.hei.ingredientspringboot.entity.StockMovement;
 import school.hei.ingredientspringboot.entity.StockValue;
 import school.hei.ingredientspringboot.entity.UnitEnum;
 import school.hei.ingredientspringboot.repository.IngredientRepository;
@@ -30,5 +31,13 @@ public class IngredientService {
 
     public StockValue getStockAt(Integer ingredientId, Instant at, UnitEnum unit) {
         return stockMovementService.getStockValueAt(ingredientId, at, unit);
+    }
+
+    public List<StockMovement> getStockMovements(Integer id, Instant from, Instant to) {
+        return stockMovementService.getMovements(id, from, to);
+    }
+
+    public List<StockMovement> addStockMovements(Integer id, List<StockMovement> movements) {
+        return stockMovementService.addMovements(id, movements);
     }
 }

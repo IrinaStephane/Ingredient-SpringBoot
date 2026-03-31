@@ -10,8 +10,9 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockMovement {
-    private int              id;
-    private StockValue       value;
+    private Integer id;
+    private Instant creationDatetime;
+    private UnitEnum unit;
+    private Double quantity;
     private MovementTypeEnum type;
-    private Instant          creationDatetime;
 }
